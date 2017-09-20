@@ -18,5 +18,6 @@ LABEL name="manageiq-embedded-ansible" \
       io.openshift.tags="Ansible,ManageIQ"
 
 RUN yum -y remove ansible-tower-ui
+RUN yum -y install --setopt=tsflags=nodocs sudo && yum clean all
 
 COPY docker-assets/initialize-tower.sh /usr/bin
