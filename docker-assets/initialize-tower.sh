@@ -29,4 +29,4 @@ rabbitmq_use_long_name=false
 rabbitmq_enable_manager=false
 EOF
 
-ansible-tower-setup -e minimum_var_space=0 -e tower_package_name=ansible-tower-server -i /inventory -- --skip-tags=packages
+ansible-tower-setup -- --extra-vars=\{\"minimum_var_space\":0,\"tower_package_name\":\"ansible-tower-server\"\} --inventory=/inventory --skip-tags=packages
