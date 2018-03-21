@@ -20,7 +20,7 @@ LABEL name="manageiq-embedded-ansible" \
 ## To cleanly shutdown systemd, use SIGRTMIN+3
 STOPSIGNAL SIGRTMIN+3
 
-COPY docker-assets/ansible-tower.repo /etc/yum.repos.d
+COPY container-assets/ansible-tower.repo /etc/yum.repos.d
 
 ## Install EPEL repo, yum necessary packages for the build without docs, clean all caches
 RUN yum -y install epel-release  \
@@ -46,9 +46,9 @@ RUN (cd /lib/systemd/system/sysinit.target.wants && for i in *; do [ $i == syste
      rm -vf /lib/systemd/system/basic.target.wants/* && \
      rm -vf /lib/systemd/system/anaconda.target.wants/*
 
-COPY docker-assets/entrypoint /usr/bin
-COPY docker-assets/initialize-tower.sh /usr/bin
-COPY docker-assets/initialize-tower.service /usr/lib/systemd/system
+COPY container-assets/entrypoint /usr/bin
+COPY container-assets/initialize-tower.sh /usr/bin
+COPY container-assets/initialize-tower.service /usr/lib/systemd/system
 
 RUN systemctl enable initialize-tower
 
