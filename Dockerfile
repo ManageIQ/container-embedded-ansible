@@ -1,4 +1,4 @@
-FROM manageiq/ansible-tower
+FROM centos:7
 MAINTAINER ManageIQ https://github.com/ManageIQ
 
 ARG REF=master
@@ -17,7 +17,42 @@ LABEL name="manageiq-embedded-ansible" \
       io.openshift.expose-services="443:https" \
       io.openshift.tags="Ansible,ManageIQ"
 
-RUN yum -y remove ansible-tower-ui
-RUN yum -y install --setopt=tsflags=nodocs sudo && yum clean all
+## To cleanly shutdown systemd, use SIGRTMIN+3
+STOPSIGNAL SIGRTMIN+3
 
+COPY docker-assets/ansible-tower.repo /etc/yum.repos.d
+
+## Install EPEL repo, yum necessary packages for the build without docs, clean all caches
+RUN yum -y install epel-release  \
+                   https://download.postgresql.org/pub/repos/yum/9.4/redhat/rhel-7-x86_64/pgdg-centos94-9.4-3.noarch.rpm && \
+
+    yum -y install --setopt=tsflags=nodocs ansible-tower-server-3.1.5 \
+                                           ansible-tower-setup-3.1.5 \
+                                           nmap-ncat \
+                                           iproute \
+                                           sudo && \
+    yum clean all
+
+## Expose required container ports
+EXPOSE 80 443
+
+## Systemd cleanup base image
+RUN (cd /lib/systemd/system/sysinit.target.wants && for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -vf $i; done) && \
+     rm -vf /lib/systemd/system/multi-user.target.wants/* && \
+     rm -vf /etc/systemd/system/*.wants/* && \
+     rm -vf /lib/systemd/system/local-fs.target.wants/* && \
+     rm -vf /lib/systemd/system/sockets.target.wants/*udev* && \
+     rm -vf /lib/systemd/system/sockets.target.wants/*initctl* && \
+     rm -vf /lib/systemd/system/basic.target.wants/* && \
+     rm -vf /lib/systemd/system/anaconda.target.wants/*
+
+COPY docker-assets/entrypoint /usr/bin
 COPY docker-assets/initialize-tower.sh /usr/bin
+COPY docker-assets/initialize-tower.service /usr/lib/systemd/system
+
+RUN systemctl enable initialize-tower
+
+VOLUME /sys/fs/cgroup
+
+ENTRYPOINT ["entrypoint"]
+CMD [ "/usr/sbin/init" ]
