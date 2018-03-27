@@ -24,10 +24,10 @@ COPY docker-assets/ansible-tower.repo /etc/yum.repos.d
 
 ## Install EPEL repo, yum necessary packages for the build without docs, clean all caches
 RUN yum -y install epel-release  \
-                   https://download.postgresql.org/pub/repos/yum/9.4/redhat/rhel-7-x86_64/pgdg-centos94-9.4-3.noarch.rpm && \
+                   https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm && \
 
-    yum -y install --setopt=tsflags=nodocs ansible-tower-server-3.1.5 \
-                                           ansible-tower-setup-3.1.5 \
+    yum -y install --setopt=tsflags=nodocs ansible-tower-server-3.2.3 \
+                                           ansible-tower-setup-3.2.3 \
                                            nmap-ncat \
                                            iproute \
                                            sudo && \
